@@ -1,0 +1,110 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct Node {
+    int data;
+    int priority;
+    struct Node* next;
+} Node;
+
+Node* createNode(int data, int priority) {
+    Node* newNode = (Node*)malloc(sizeof(Node));
+    if (newNode) {
+        newNode->data = data;
+        newNode->priority = priority;
+        newNode->next = NULL;
+    }
+    return newNode;
+}
+
+Node* enqueue(Node* front, int data, int priority) {
+    Node* newNode = createNode(data, priority);
+    if (!newNode) {
+        printf("Memory allocation error.\n");
+        return front;
+    }
+
+    if (front == NULL || priority < front->priority) {
+        newNode->next = front;
+        front = newNode;
+    } else {
+        Node* current = front;
+        while (current->next != NULL && current->next->priority <= priority) {
+            current = current->next;
+        }
+        newNode->next = current->next;
+        current->next = newNode;
+    }
+
+    return front;
+}
+
+Node* dequeue(Node* front) {
+    if (front == NULL) {
+        printf("Priority Queue is empty. Cannot dequeue.\n");
+    } else {
+        Node* temp = front;
+        printf("Dequeued data: %d (Priority: %d)\n", temp->data, temp->priority);
+        front = front->next;
+        free(temp);
+    }
+    return front;
+}
+
+void traverse(Node* front) {
+    if (front == NULL) {
+        printf("Priority Queue is empty.\n");
+    } else {
+        printf("Priority Queue (Data, Priority):\n");
+        Node* current = front;
+        while (current != NULL) {
+            printf("(%d, %d) ", current->data, current->priority);
+            current = current->next;
+        }
+        printf("\n");
+    }
+}
+
+int main() {
+    Node* front = NULL;
+    int choice, data, priority;
+
+    while (1) {
+        printf("\nMenu:\n");
+        printf("1. Enqueue\n");
+        printf("2. Dequeue\n");
+        printf("3. Traverse Priority Queue\n");
+        printf("4. Exit\n");
+        printf("Enter your choice: ");
+        scanf("%d", &choice);
+
+        switch (choice) {
+            case 1:
+                printf("Enter data to enqueue: ");
+                scanf("%d", &data);
+                printf("Enter priority for the data: ");
+                scanf("%d", &priority);
+                front = enqueue(front, data, priority);
+                break;
+            case 2:
+                front = dequeue(front);
+                break;
+            case 3:
+                traverse(front);
+                break;
+            case 4:
+                printf("Exiting the program.\n");
+                // Free memory for all nodes before exiting
+                while (front != NULL) {
+                    Node* temp = front;
+                    front = front->next;
+                    free(temp);
+                }
+                return 0;
+            default:
+                printf("Invalid choice. Please try again.\n");
+        }
+    }
+
+    return 0;
+}
