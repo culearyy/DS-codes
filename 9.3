@@ -1,0 +1,211 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct Node {
+    int data;
+    struct Node* left;
+    struct Node* right;
+} Node;
+
+Node* insert(Node* root, int data) {
+    if (root == NULL) {
+        Node* newNode = (Node*)malloc(sizeof(Node));
+        newNode->data = data;
+        newNode->left = newNode->right = NULL;
+        return newNode;
+    }
+
+    if (data < root->data) {
+        root->left = insert(root->left, data);
+    } else if (data > root->data) {
+        root->right = insert(root->right, data);
+    }
+
+    return root;
+}
+
+Node* findSmallest(Node* root) {
+    while (root->left != NULL) {
+        root = root->left;
+    }
+    return root;
+}
+
+Node* deleteNode(Node* root, int key) {
+    if (root == NULL) {
+        return root;
+    }
+
+    if (key < root->data) {
+        root->left = deleteNode(root->left, key);
+    } else if (key > root->data) {
+        root->right = deleteNode(root->right, key);
+    } else {
+        if (root->left == NULL) {
+            Node* temp = root->right;
+            free(root);
+            return temp;
+        } else if (root->right == NULL) {
+            Node* temp = root->left;
+            free(root);
+            return temp;
+        }
+
+        Node* temp = findSmallest(root->right);
+        root->data = temp->data;
+        root->right = deleteNode(root->right, temp->data);
+    }
+    return root;
+}
+
+int findLargest(Node* root) {
+    while (root->right != NULL) {
+        root = root->right;
+    }
+    return root->data;
+}
+
+int findHeight(Node* root) {
+    if (root == NULL) {
+        return -1;
+    }
+
+    int leftHeight = findHeight(root->left);
+    int rightHeight = findHeight(root->right);
+
+    return (leftHeight > rightHeight) ? (leftHeight + 1) : (rightHeight + 1);
+}
+
+int countLeafNodes(Node* root) {
+    if (root == NULL) {
+        return 0;
+    }
+    if (root->left == NULL && root->right == NULL) {
+        return 1;
+    }
+    return countLeafNodes(root->left) + countLeafNodes(root->right);
+}
+
+void preorderTraversal(Node* root) {
+    if (root != NULL) {
+        printf("%d ", root->data);
+        preorderTraversal(root->left);
+        preorderTraversal(root->right);
+    }
+}
+
+void inorderTraversal(Node* root) {
+    if (root != NULL) {
+        inorderTraversal(root->left);
+        printf("%d ", root->data);
+        inorderTraversal(root->right);
+    }
+}
+
+void postorderTraversal(Node* root) {
+    if (root != NULL) {
+        postorderTraversal(root->left);
+        postorderTraversal(root->right);
+        printf("%d ", root->data);
+    }
+}
+
+Node* search(Node* root, int key) {
+    if (root == NULL || root->data == key) {
+        return root;
+    }
+
+    if (key < root->data) {
+        return search(root->left, key);
+    }
+
+    return search(root->right, key);
+}
+
+int main() {
+    Node* root = NULL;
+    int choice, data;
+
+    while (1) {
+        printf("\nMenu:\n");
+        printf("1. Insert a data element\n");
+        printf("2. Preorder Traversal\n");
+        printf("3. Inorder Traversal\n");
+        printf("4. Postorder Traversal\n");
+        printf("5. Search for an element\n");
+        printf("6. Display the largest element\n");
+        printf("7. Display the smallest element\n");
+        printf("8. Height of a node\n");
+        printf("9. Count number of leaf nodes\n");
+        printf("10. Delete an element\n");
+        printf("11. Exit\n");
+        printf("Enter your choice: ");
+        scanf("%d", &choice);
+
+        switch (choice) {
+            case 1:
+                printf("Enter data to insert: ");
+                scanf("%d", &data);
+                root = insert(root, data);
+                break;
+            case 2:
+                printf("Preorder Traversal: ");
+                preorderTraversal(root);
+                printf("\n");
+                break;
+            case 3:
+                printf("Inorder Traversal: ");
+                inorderTraversal(root);
+                printf("\n");
+                break;
+            case 4:
+                printf("Postorder Traversal: ");
+                postorderTraversal(root);
+                printf("\n");
+                break;
+            case 5:
+                printf("Enter element to search: ");
+                scanf("%d", &data);
+                Node* result = search(root, data);
+                if (result != NULL) {
+                    printf("Element %d found in the tree.\n", data);
+                } else {
+                    printf("Element %d not found in the tree.\n", data);
+                }
+                break;
+            case 6:
+                printf("Largest element in the tree: %d\n", findLargest(root));
+                break;
+            case 7:
+                printf("Smallest element in the tree: %d\n", findSmallest(root));
+                break;
+            case 8:
+                printf("Enter node data to find its height: ");
+                scanf("%d", &data);
+                int height = findHeight(search(root, data));
+                if (height >= 0) {
+                    printf("Height of node %d is %d\n", data, height);
+                } else {
+                    printf("Node not found in the tree.\n");
+                }
+                break;
+            case 9:
+                printf("Number of leaf nodes in the tree: %d\n", countLeafNodes(root));
+                break;
+            case 10:
+                printf("Enter element to delete: ");
+                scanf("%d", &data);
+                root = deleteNode(root, data);
+                break;
+            case 11:
+                printf("Exiting the program.\n");
+                // Free memory for all nodes before exiting
+                // Implement a function to free the tree if needed
+                return 0;
+            default:
+                printf("Invalid choice. Please try again.\n");
+        }
+    }
+
+    return 0;
+}
